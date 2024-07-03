@@ -55,7 +55,6 @@ This is a very simple program that can be run on your machine to automatically d
     - Activate the virtual environment:
         
         ```bash
-        bashCopy code
         source env/bin/activate
         
         ```
