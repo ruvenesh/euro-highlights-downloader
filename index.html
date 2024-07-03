@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R P J the Great</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        h1,h2 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 40px;
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+        p {
+            font-size: 5;
+            text-align: center;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #ffffff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        li:hover {
+            transform: translateY(-3px);
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .back-button {
+            display: none;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            .search-container input {
+                width: 100%;
+            }
+            .back-button {
+                width: 100%;
+            }
+            video {
+                width: 100%;
+                display: block;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>UEFA Highlights</h1>
+    <p>fuck you SPOTV</p>
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search videos...">
+    </div>
+    <ul id="videoList"></ul>
+    <button class="back-button" id="backButton">Back to List</button>
+
+    <script>
+        // Function to get query parameters
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                video: params.get('video')
+            };
+        }
+
+        // Initialize page based on query parameters
+        const params = getQueryParams();
+        const videoSrc = params.video;
+        const videoListElement = document.getElementById('videoList');
+        const backButton = document.getElementById('backButton');
+        const searchBar = document.getElementById('searchBar');
+
+        if (videoSrc) {
+            // Hide video list and show the back button when a video is selected
+            videoListElement.style.display = 'none';
+            backButton.style.display = 'block';
+
+            // Create the video player element
+            const playerContainer = document.createElement('div');
+            playerContainer.innerHTML = `
+                <video id="videoPlayer" controls>
+                    Your browser does not support the video tag.
+                </video>
+            `;
+            document.body.appendChild(playerContainer);
+
+            const videoPlayerElement = document.getElementById('videoPlayer');
+            videoPlayerElement.src = videoSrc;
+
+            backButton.addEventListener('click', () => {
+                window.location.href = window.location.pathname;
+            });
+        } else {
+            // Show the video list and hide the back button
+            videoListElement.style.display = 'block';
+            backButton.style.display = 'none';
+
+            // Fetch the videos.json file
+            fetch('videos.json')
+                .then(response => response.json())
+                .then(data => {
+                    const ul = document.getElementById('videoList');
+                    ul.innerHTML = ''; // Clear previous list items
+
+                    data.forEach(video => {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = `?video=${encodeURIComponent(video.path)}`;
+                        link.textContent = video.name;
+                        li.appendChild(link);
+                        ul.appendChild(li);
+                    });
+
+                    // Add search functionality
+                    searchBar.addEventListener('input', (e) => {
+                        const searchQuery = e.target.value.toLowerCase();
+                        const filteredVideos = data.filter(video => video.name.toLowerCase().includes(searchQuery));
+
+                        ul.innerHTML = ''; // Clear previous list items
+                        filteredVideos.forEach(video => {
+                            const li = document.createElement('li');
+                            const link = document.createElement('a');
+                            link.href = `?video=${encodeURIComponent(video.path)}`;
+                            link.textContent = video.name;
+                            li.appendChild(link);
+                            ul.appendChild(li);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching the videos:', error));
+        }
+    </script>
+</body>
+</html>
